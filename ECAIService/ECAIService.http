@@ -14,7 +14,10 @@ POST {{ECAIService_HostAddress}}/api/contentbasedvector/calculateVectors
 
 ###
 
+POST {{ECAIService_HostAddress}}/api/contentbasedvector/calculateVector?variantId=variant_01JG0XCNJW5ZXK02KE5BX73PND
 
-GET {{ECAIService_HostAddress}}/api/contentbasedvector/neighbors?variant=variant_01JG0XCNJW5ZXK02KE5BX73PND&id=5
+###
+
+GET {{ECAIService_HostAddress}}/api/contentbasedvector/neighbors?variantId=variant_01JG0XCNJW5ZXK02KE5BX73PND&id=5
 
 ###
