@@ -9,9 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="5.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.ML" Version="4.0.0" />
+    <PackageReference Include="Microsoft.ML.TensorFlow" Version="4.0.0" />
+    <PackageReference Include="Microsoft.ML.TorchSharp" Version="0.22.0" />
 	<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -19,6 +22,23 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="Pgvector.Dapper" Version="0.3.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="System.Windows.Extensions" Version="9.0.0" />
+    <PackageReference Include="TensorFlow.Keras" Version="0.15.0" />
+    <PackageReference Include="TorchSharp-cuda-windows" Version="0.105.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="TorchSharp" />
+    <Using Include="TorchSharp.Modules" />
+    <Using Include="TorchSharp.torch">
+      <Static>True</Static>
+    </Using>
+    <Using Include="TorchSharp.torch.nn">
+      <Static>True</Static>
+    </Using>
   </ItemGroup>
 
 </Project>

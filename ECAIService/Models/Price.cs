@@ -23,7 +23,7 @@ public partial class Price
     public string CurrencyCode { get; set; } = null!;
 
     [Column("raw_amount", TypeName = "jsonb")]
-    public string RawAmount { get; set; } = null!;
+    public string RawAmount { get; set; } = "";
 
     [Column("rules_count")]
     public int? RulesCount { get; set; }

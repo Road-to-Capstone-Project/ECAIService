@@ -10,6 +10,7 @@ using Microsoft.ML;
 using ECAIService.Services.Abstractions;
 using Microsoft.ML.Data;
 using Pgvector;
+using System.ComponentModel.DataAnnotations;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -59,12 +60,12 @@ public class ContentBasedVectorController(
 
     // DELETE api/<ContentBasedVectorController>/5
     [HttpDelete("[action]")]
-    public async Task Delete(int variantId)
+    public async Task Delete(string variantId)
     {
         using var dataSource = dataSourceBuilder.Build();
         using var npgsqlConnection = dataSource.CreateConnection();
 
-        await npgsqlConnection.ExecuteAsync($"DELETE {ContentBasedVectorTable} WHERE variant_id = @VariantId",
+        await npgsqlConnection.ExecuteAsync($"DELETE FROM {ContentBasedVectorTable} WHERE variant_id = @VariantId",
             new { VariantId = variantId });
     }
 
@@ -77,12 +78,12 @@ public class ContentBasedVectorController(
         await npgsqlConnection.ExecuteAsync($"TRUNCATE TABLE {ContentBasedVectorTable}");
 
         var dataView = cVOSContext.ProductVariants
-            .Select(it => new
+            .Select(i => new
             {
-                VariantId = it.Id,
-                Categories = it.Product!.ProductCategories.Select(it => it.Name).ToArray(),
-                Weight = int.Parse(it.Product!.Weight!),
-                Price = cVOSContext.ProductVariantPriceSets.Where(it => it.VariantId == it.Id)
+                VariantId = i.Id,
+                Categories = i.Product!.ProductCategories.Select(it => it.Name).ToArray(),
+                Weight = double.Parse(i.Product!.Weight!),
+                Price = (double)cVOSContext.ProductVariantPriceSets.Where(it => it.VariantId == i.Id)
                     .Select(it => 
                         cVOSContext.PriceSets
                         .Where(i => i.Id == it.PriceSetId)
@@ -150,9 +151,9 @@ public class ContentBasedVectorController(
                             it.Prices
                             .Where(i => i.CurrencyCode == "usd")
                             .Select(i => i.Amount)
-                            .First())
-                        .First())
-                    .First()
+                            .FirstOrDefault())
+                        .FirstOrDefault())
+                    .FirstOrDefault()
             })
             .AsEnumerable()
             .Select(it => new ContentBasedVectorInput()
@@ -194,9 +195,8 @@ public class ContentBasedVectorController(
             else
             {
                 await npgsqlConnection.ExecuteAsync(
-                    $"UPDATE {ContentBasedVectorTable} SET" +
-                    $"variant_id = @VariantId " +
-                    $",{nameof(ContentBasedVector.Embeddings).ToLower()} = @Embeddings " +
+                    $"UPDATE {ContentBasedVectorTable} SET " +
+                    $"{nameof(ContentBasedVector.Embeddings).ToLower()} = @Embeddings " +
                     $"WHERE variant_id = @VariantId",
                     new { vector.VariantId, vector.Embeddings }
                 );
@@ -205,7 +205,7 @@ public class ContentBasedVectorController(
     }
 
     [HttpGet("[action]")]
-    public async Task<IEnumerable<string>> Neighbors(string variantId, int count)
+    public async Task<IEnumerable<string>> Neighbors([Required] string variantId, [Required] int count, bool distance = false)
     {
         using var dataSource = dataSourceBuilder.Build();
         using var npgsqlConnection = dataSource.CreateConnection();
@@ -218,12 +218,23 @@ public class ContentBasedVectorController(
         {
             return [];
         }
-        var result = await npgsqlConnection.QueryAsync<string>(
-            $"SELECT variant_id FROM {ContentBasedVectorTable} " +
-            $"ORDER BY {nameof(ContentBasedVector.Embeddings).ToLower()} <-> @vector " +
-            $"LIMIT @count",
-            new { vector, count }
+
+        var productId = await npgsqlConnection.QueryFirstOrDefaultAsync<string>(
+            $"SELECT product_id FROM public.product_variant WHERE id = @variantId",
+            new { variantId }
         );
-        return result;
+
+        var result = await npgsqlConnection.QueryAsync<DistanceResult<string>>(
+            $"SELECT variant_id AS id, " +
+            $"{nameof(ContentBasedVector.Embeddings).ToLower()} <-> @vector AS distance " +
+            $"FROM {ContentBasedVectorTable} " +
+            $"WHERE variant_id <> @variantId " +
+            $"AND product_id <> @productId " +
+            $"ORDER BY distance " +  // Added space before "LIMIT"
+            $"LIMIT @count",
+            new { vector, count, variantId, productId }
+        );
+
+        return result.Select(i => distance ? i.ToString() : i.Id);
     }
 }

@@ -1,4 +1,6 @@
-@ECAIService_HostAddress = http://localhost:5171
+@ECAIService_HostAddressDebug = http://localhost:5171
+@ECAIService_HostAddressRelease = http://localhost:5000
+@ECAIService_HostAddress = {{ECAIService_HostAddressDebug}}
 
 GET {{ECAIService_HostAddress}}/weatherforecast/
 Accept: application/json
@@ -18,6 +20,14 @@ POST {{ECAIService_HostAddress}}/api/contentbasedvector/calculateVector?variantI
 
 ###
 
-GET {{ECAIService_HostAddress}}/api/contentbasedvector/neighbors?variantId=variant_01JG0XCNJW5ZXK02KE5BX73PND&id=5
+DELETE {{ECAIService_HostAddress}}/api/contentbasedvector/delete?variantId=variant_01JG0XCNJW5ZXK02KE5BX73PND
 
+###
+
+GET {{ECAIService_HostAddress}}/api/contentbasedvector/neighbors?variantId=ÅyMiku+AR+CameraÅzMikuture&count=100&distance=true
+
+###
+
+GET http://localhost:9000/store/product-categories?fields=%2Acategory_children%2C%20%2Aproducts%2C%20%2Aparent_category%2C%20%2Aparent_category.parent_category&limit=100
+x-publishable-api-key: pk_ab81ea0abb05a1fdf71cfc0837e2dee02a9735e202ea179ff918207c945c0dfc
 ###

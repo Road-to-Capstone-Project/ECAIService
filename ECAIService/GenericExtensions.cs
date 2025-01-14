@@ -11,14 +11,39 @@ namespace ECAIService;
 public static class GenericExtensions
 {
     public static T Apply<T>(this T obj, Action<T> action)
+        where T : allows ref struct
     {
         action(obj);
         return obj;
     }
 
     public static TOut Let<T, TOut>(this T obj, Func<T, TOut> func)
+        where T : allows ref struct
+        where TOut : allows ref struct
+        
     {
         return func(obj);
+    }
+
+    public static TOut Let<T, T0, TOut>(this T obj, Func<T, T0, TOut> func, T0 arg)
+        where T : allows ref struct
+        where T0 : allows ref struct
+        where TOut : allows ref struct
+    {
+        return func(obj, arg);
+    }
+
+    public static TOut Let<T, T0, TOut>(this T obj, Func<T0, T, TOut> func, T0 arg)
+        where T : allows ref struct
+        where T0 : allows ref struct
+        where TOut : allows ref struct
+    {
+        return func(arg, obj);
+    }
+
+    public static IEnumerable<T> SelectMany<T>(this IEnumerable<IEnumerable<T>> source)
+    {
+        return source.SelectMany(i => i);
     }
 
     public static TOut Be<T, TOut>(this T _, TOut other)
@@ -32,7 +57,15 @@ public static class GenericExtensions
         catch { }
     }
 
+    public static void Fire(this ReadOnlySpan<Action> actions)
+    {
+        foreach (var action in actions)
+            try { action(); }
+            catch { }
+    }
+
     public static T Run<T>(this Func<T> func)
+        where T : allows ref struct
     {
         return func();
     }   
