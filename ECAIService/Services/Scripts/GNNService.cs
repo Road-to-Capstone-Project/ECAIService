@@ -1,19 +1,24 @@
-﻿using ECAIService.Data;
+﻿
+using ECAIService.Data;
 using ECAIService.MachineLearning;
 
 namespace ECAIService.Services.Scripts;
 
-public class GNNService
+public class GNNService(CVOSContext cVOSContext, Device device, [FromKeyedServices(nameof(GNNService))] ICollection<string> sequence) : IAsyncScript
 {
-    public GNNService(CVOSContext cVOSContext, Device device)
+    public ICollection<string> Sequence { get; set; } = sequence; 
+
+    public async Task<object?> ExecuteAsync()
     {
-        var sessions = File.ReadAllLines("Resources/sessions.txt").Select(i => i.Split(';')).ToArray();
+        var sessions = 
+            (await File.ReadAllLinesAsync("Resources/sessions.txt"))
+            .Select(i => i.Split(';')).ToArray();
 
         Console.WriteLine("Loading data...");
 
         var productKVs = cVOSContext.ProductVariants.AsEnumerable().Zip(Enumerable.Range(0, int.MaxValue));
 
-        File.WriteAllText("Resources/output1.txt",
+        await File.WriteAllTextAsync("Resources/output1.txt",
                            cVOSContext.ProductVariants
                            .Select(i => i.Id)
                            .Let(it => string.Join('\n', it))
@@ -27,7 +32,7 @@ public class GNNService
 
         var graphData = GraphData2.FromSession(sessions, products).to(device);
 
-        File.WriteAllText("Resources/adjacencyMatrix.txt", graphData.AdjacencyMatrix.ToString());
+        await File.WriteAllTextAsync("Resources/adjacencyMatrix.txt", graphData.AdjacencyMatrix.ToString());
 
         Console.WriteLine("Graph Data.");
 
@@ -45,6 +50,8 @@ public class GNNService
         Console.WriteLine("Train done.");
 
         GNNModel.Predict(output, products, inverse,
-            ["【Miku AR Camera】Mikuture"]);
+            Sequence);
+
+        return await GenericExtensions.NullTask;
     }
 }

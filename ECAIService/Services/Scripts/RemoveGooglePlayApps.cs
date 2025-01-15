@@ -1,14 +1,24 @@
-﻿using ECAIService.Data;
+﻿
+using ECAIService.Data;
+using ECAIService.Models;
 using ECAIService.PipelineDto;
 
 using Newtonsoft.Json;
 
 namespace ECAIService.Services.Scripts;
 
-public class RemoveGooglePlayApps
+public class RemoveGooglePlayApps(CVOSContext cVOSContext) : IAsyncScript
 {
-    public RemoveGooglePlayApps(CVOSContext cVOSContext)
+
+    public async Task<object?> ExecuteAsync()
     {
+        var salesChannel = cVOSContext.SalesChannels.Find("google-play");
+
+        if (salesChannel is null)
+        {
+            return -1;
+        }
+
         var categories = cVOSContext.ProductCategories
             .Where(i => i.Metadata != null)
             .AsEnumerable()
@@ -18,11 +28,19 @@ public class RemoveGooglePlayApps
 
         var productIds = cVOSContext.ProductSalesChannels.Where(i => i.SalesChannelId == "google-play").ToList();
 
+        cVOSContext.PublishableApiKeySalesChannels.RemoveRange(
+            cVOSContext.PublishableApiKeySalesChannels.Where(i => i.SalesChannelId == "google-play")
+        );
+
         cVOSContext.ProductSalesChannels.RemoveRange(productIds);
 
-        foreach(var productId in productIds)
+        foreach (var productId in productIds)
         {
-            var product = cVOSContext.Products.Find(productId.ProductId)!;
+            var product = (await cVOSContext.Products.FindAsync(productId.ProductId))!;
+
+            cVOSContext.RemoveRange(
+            cVOSContext.ProductSalesChannels.Where(i => i.ProductId == product.Id)
+            );
 
             var variant = cVOSContext.ProductVariants.Where(i => i.ProductId == product.Id).Single()!;
 
@@ -37,8 +55,8 @@ public class RemoveGooglePlayApps
             cVOSContext.Products.Remove(product);
         }
 
-        cVOSContext.SalesChannels.Remove(cVOSContext.SalesChannels.Find("google-play")!);
+        cVOSContext.SalesChannels.Remove(salesChannel);
 
-        cVOSContext.SaveChanges();
+        return await cVOSContext.SaveChangesAsync();
     }
 }

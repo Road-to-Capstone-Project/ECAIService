@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿
+using Dapper;
 
 using ECAIService.Data;
 using ECAIService.PipelineDto;
@@ -12,12 +13,13 @@ using static ECAIService.Consts;
 
 namespace ECAIService.Services.Scripts;
 
-public class SessionGenerator
-{
-    public SessionGenerator(
-        Random random,
+public class SessionGenerator(Random random,
         CVOSContext cVOSContext,
         NpgsqlConnectionDisposables npgsqlConnectionDisposables)
+    : IAsyncScript
+{
+
+    public async Task<object?> ExecuteAsync()
     {
         using var u = npgsqlConnectionDisposables;
         var (dataSource, connection) = npgsqlConnectionDisposables;
@@ -69,5 +71,7 @@ public class SessionGenerator
             )
             .Let(it => string.Join("\n", it))
         );
+
+        return await GenericExtensions.NullTask;
     }
 }

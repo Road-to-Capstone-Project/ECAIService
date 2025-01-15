@@ -1,5 +1,6 @@
 ﻿using System.Collections.Frozen;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Web;
 
 using ECAIService.Data;
@@ -15,16 +16,39 @@ using Tensorflow.Keras.Metrics;
 
 namespace ECAIService.Services.Scripts;
 
-public class ImportGooglePlayApps
-{
-    public ImportGooglePlayApps
-    (
+public partial class ImportGooglePlayApps(
         CVOSContext cVOSContext,
         MLContext mLContext,
         IEncodingService encodingService,
         Random random
-    )
+    ) : IAsyncScript
+{
+
+    [GeneratedRegex("[^a-z0-9]")]
+    internal static partial Regex SpecialCharsRegex();
+
+    [GeneratedRegex("^-|-$")]
+    internal static partial Regex LeadingCharsRegex();
+    
+
+    internal static string ToHandle(string it) => it
+    .ToLower()
+    .Let(it => SpecialCharsRegex().Replace(it, "-"))
+    //.Let(it => LeadingCharsRegex().Replace(it, ""))
+       ;
+
+    public async Task<object?> ExecuteAsync()
     {
+        var apiKey = (await cVOSContext.ApiKeys.FindAsync("google-play")) ?? 
+        (await cVOSContext.ApiKeys.AddAsync(new()
+        {
+            Id = "google-play",
+            Token = "google-play",
+            Type = "publishable",
+            Redacted = "g*****-p***",
+            Title = "Google Play"
+        })).Entity;
+
         var data = mLContext.Data.LoadFromTextFile<GooglePlayApp>("Resources/googleplaystoreCleaned.csv",
             separatorChar: '\t',
             hasHeader: true,
@@ -34,27 +58,35 @@ public class ImportGooglePlayApps
 
         var categories = encodingService.GetCategories(data.Select(i => i.Genres));
 
-        var categoryEntities = categories.Select(category =>
-            cVOSContext.ProductCategories.Add(new ProductCategory()
+        var categoryEntities = (await categories.Select(async category =>
+            (await cVOSContext.ProductCategories.AddAsync(new ProductCategory()
             {
-                Id = category.Key,
+                Id = category.Key.Let(ToHandle),
                 Name = category.Key,
-                Handle = category.Key,
+                Handle = category.Key.Let(ToHandle),
                 Description = category.Key,
                 Mpath = category.Key,
                 IsActive = true,
                 Metadata = JsonConvert.SerializeObject(new { GooglePlayApp = true }),
-            }).Entity
-        ).ToFrozenDictionary(i => i.Id);
+            })).Entity
+        ).Let(Task.WhenAll))
+        .ToFrozenDictionary(i => i.Name);
 
         var index = 0;
         List<int> list = [];
 
-        var salesChannel = cVOSContext.SalesChannels.Add(new()
+        var salesChannel = await cVOSContext.SalesChannels.AddAsync(new()
         {
             Id = "google-play",
             Name = "Google Play",
             Description = "Google Play"
+        });
+
+        await cVOSContext.PublishableApiKeySalesChannels.AddAsync(new()
+        {
+            SalesChannelId = salesChannel.Entity.Id,
+            PublishableKeyId = apiKey.Id,
+            Id = $"{apiKey.Id}-{salesChannel.Entity.Id}"
         });
 
         foreach (var item in data)
@@ -73,24 +105,26 @@ public class ImportGooglePlayApps
                 var font = random.Next(0, int.Parse("FFF", NumberStyles.HexNumber))
                     .ToString("X");
 
-                var product = cVOSContext.Products.Add(new()
+                var handle = item.AppName.Let(ToHandle);
+
+                var product = await cVOSContext.Products.AddAsync(new()
                 {
-                    Id = item.AppName,
+                    Id = handle,
                     Title = item.AppName,
-                    Handle = item.AppName,
+                    Handle = handle,
                     Description = item.AppName,
                     Subtitle = item.AppName,
-                    Weight = (item.Rating.Let(it => double.Round(it, 2, MidpointRounding.AwayFromZero)) * 100).ToString(),
                     Thumbnail = $"https://placehold.co/360x450/{background}/{font}?text={HttpUtility.UrlEncode(item.AppName)}",
                     Status = "published",
                     ProductCategories = item.Genres.Split(";").Select(s => categoryEntities[s]).ToArray()
                 });
 
-                var variant = cVOSContext.ProductVariants.Add(new()
+                var variant = await cVOSContext.ProductVariants.AddAsync(new()
                 {
-                    Id = item.AppName,
+                    Id = handle,
                     Title = item.AppName,
-                    Product = product.Entity
+                    Product = product.Entity,
+                    VariantRank = (item.Rating.Let(it => double.Round(it, 2, MidpointRounding.AwayFromZero)) * 100).Let(it => (int)it),
                 });
 
                 static decimal priceParse(string it) => it == "0" ? 0 : decimal.Parse(it.Substring(1));
@@ -116,9 +150,9 @@ public class ImportGooglePlayApps
                             }),
                 };
 
-                var priceSet = cVOSContext.PriceSets.Add(new()
+                var priceSet = await cVOSContext.PriceSets.AddAsync(new()
                 {
-                    Id = item.AppName,
+                    Id = handle,
                     Prices =
                     [
                         priceFunc(),
@@ -127,25 +161,22 @@ public class ImportGooglePlayApps
                 });
 
                 var pvps =
-                    cVOSContext.ProductVariantPriceSets.Add(new()
+                    await cVOSContext.ProductVariantPriceSets.AddAsync(new()
                     {
-                        VariantId = item.AppName,
-                        PriceSetId = item.AppName,
-                        Id = item.AppName,
+                        VariantId = handle,
+                        PriceSetId = handle,
+                        Id = handle,
                     });
 
-                var productSalesChannel = cVOSContext.ProductSalesChannels.Add(new()
+                var productSalesChannel = await cVOSContext.ProductSalesChannels.AddAsync(new()
                 {
-                    ProductId = item.AppName,
+                    ProductId = handle,
                     SalesChannelId = salesChannel.Entity.Id,
-                    Id = item.AppName
+                    Id = handle
                 });
             }
             index++;
         }
-        Console.WriteLine(list.JoinToString(", "));
-        cVOSContext.SaveChanges();
-        Console.WriteLine(list.JoinToString(", "));
+        return await cVOSContext.SaveChangesAsync();
     }
-
 }

@@ -13,6 +13,7 @@ Accept: application/json
 ###
 
 POST {{ECAIService_HostAddress}}/api/contentbasedvector/calculateVectors
+timeout: 1000000
 
 ###
 
@@ -24,10 +25,19 @@ DELETE {{ECAIService_HostAddress}}/api/contentbasedvector/delete?variantId=varia
 
 ###
 
-GET {{ECAIService_HostAddress}}/api/contentbasedvector/neighbors?variantId=ÅyMiku+AR+CameraÅzMikuture&count=100&distance=true
-
+GET {{ECAIService_HostAddress}}/api/contentbasedvector/neighbors?variantId=--av--&count=12&distance=true
+timeout: 1000000
 ###
 
 GET http://localhost:9000/store/product-categories?fields=%2Acategory_children%2C%20%2Aproducts%2C%20%2Aparent_category%2C%20%2Aparent_category.parent_category&limit=100
 x-publishable-api-key: pk_ab81ea0abb05a1fdf71cfc0837e2dee02a9735e202ea179ff918207c945c0dfc
 ###
+
+GET {{ECAIService_HostAddress}}/api/script
+###
+
+POST {{ECAIService_HostAddress}}/api/script?s=DataCleaner
+timeout: 1000000
+###
+
+POST {{ECAIService_HostAddress}}/api/script/gnn?i=-r

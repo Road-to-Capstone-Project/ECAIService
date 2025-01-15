@@ -16,6 +16,9 @@ using Castle.DynamicProxy;
 using System.Diagnostics;
 using Serilog;
 using Serilog.Extensions.Logging;
+using System.Text.Encodings.Web;
+using System.Web;
+using Newtonsoft.Json;
 
 var waitTimeMs = 5000;
 
@@ -28,9 +31,12 @@ var argsSet = args.ToHashSet();
 
 Console.WriteLine(argsSet.JoinToString(",\n"));
 
+//Console.WriteLine(HttpUtility.UrlEncode("/"));
+
 var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
     .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
     .Enrich.FromLogContext()
     .CreateLogger();
@@ -52,7 +58,7 @@ builder.Services.AddDbContext<CVOSContext>(options =>
     options.UseNpgsql(connectionString)
     .EnableDetailedErrors()
     .EnableSensitiveDataLogging()
-    .LogTo(i => logger.Log(LogLevel.Debug, i))
+    .LogTo(i => logger.Log(LogLevel.Trace, i), LogLevel.Trace)
     );
 
 builder.Services.AddSingleton<MLContext>();
@@ -99,24 +105,21 @@ proxyOptions.Hook = new AllMethodsHook();
 
 
 void AddScriptService<T>()
+    where T : class, IAsyncScript
 {
-    scriptServiceDict.Add(typeof(T).Name, typeof(T));
+    //scriptServiceDict.Add(typeof(T).Name, typeof(T));
+    builder.Services.AddKeyedTransient<IAsyncScript, T>(typeof(T).Name);
+    builder.Services.AddTransient<IAsyncScript, T>();
 }
 
 AddScriptService<ImportGooglePlayApps>();
 AddScriptService<DataCleaner>();
 AddScriptService<GNNService>();
+builder.Services.AddTransient<GNNService>();
+builder.Services.AddKeyedSingleton<ICollection<string>>(nameof(GNNService), ["-r"]);
 AddScriptService<SessionGenerator>();
 AddScriptService<TokenDictionaryService>();
 AddScriptService<RemoveGooglePlayApps>();
-
-foreach (var arg in args)
-{
-    if (scriptServiceDict.TryGetValue(arg, out Type? value))
-    {
-        builder.Services.AddTransient(value);
-    }
-}
 
 random.manual_seed(42);
 cuda.manual_seed(42);
@@ -125,21 +128,22 @@ cuda.manual_seed_all(42);
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+foreach(var service in builder.Services)
+{
+    //logger.LogInformation(service.ToString());
+}
+
+using (var scope_ = app.Services.CreateScope())
 {
     var stopWatch = new Stopwatch();
     //Directory.CreateDirectory("Resources/Logs");
     //using var fileStream = File.AppendText("Resources/Logs/Startup.txt");
     foreach (var arg in args)
     {
-        if (scriptServiceDict.TryGetValue(arg, out Type? value))
+        var script = app.Services.GetKeyedService<IAsyncScript>(arg);
+        if (script is not null)
         {
-            stopWatch.Restart();
-
-            scope.ServiceProvider.GetRequiredService(value);
-
-            stopWatch.Stop();
-            logger.Log(LogLevel.Debug, "Script {Name} took {ElapsedMilliseconds}ms", value.Name, stopWatch.ElapsedMilliseconds);
+            await script.ExecuteAsync();
         }
     }
 }

@@ -1,13 +1,17 @@
-﻿using ECAIService.Data;
+﻿
+using ECAIService.Data;
 
 namespace ECAIService.Services.Scripts;
 
-public class TokenDictionaryService
+public class TokenDictionaryService(CVOSContext cVOSContext) : IAsyncScript
 {
-    public TokenDictionaryService(CVOSContext cVOSContext)
+    public async Task<object?> ExecuteAsync()
     {
-        var tokens = File.ReadAllLines("Resources/sessions.txt").Select(i => i.Split(';'))
-            .SelectMany(i => i);
+        var tokens = await File.ReadAllLinesAsync("Resources/sessions.txt")
+            .LetAsync(i => i
+                .Select(i => i.Split(';'))
+                .SelectMany(i => i)
+            );
 
         var tokenDictionary = cVOSContext.ProductVariants.Select(i => i.Id)
             .ToDictionary(i => i, i => 0);
@@ -20,6 +24,8 @@ public class TokenDictionaryService
             tokenDictionary[token]++;
         }
 
-        File.WriteAllText("Resources/tokenDictionary.csv", counter + "\n" + string.Join("\n", tokenDictionary.OrderByDescending(i => i.Value).Select(it => $"{it.Key}\t{it.Value}")));
+        await File.WriteAllTextAsync("Resources/tokenDictionary.csv", counter + "\n" + string.Join("\n", tokenDictionary.OrderByDescending(i => i.Value).Select(it => $"{it.Key}\t{it.Value}")));
+
+        return null;
     }
 }

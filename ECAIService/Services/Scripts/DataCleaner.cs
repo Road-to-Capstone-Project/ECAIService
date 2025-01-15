@@ -1,14 +1,16 @@
-﻿using ECAIService.PipelineDto;
+﻿
+using ECAIService.PipelineDto;
 
 using Microsoft.ML;
 
 namespace ECAIService.Services.Scripts;
 
-public class DataCleaner
-{
-    public DataCleaner(
+public class DataCleaner(
         MLContext mLContext
-    )
+    ) : IAsyncScript
+{
+
+    public async Task<object?> ExecuteAsync()
     {
         using var fileStream = new FileStream("Resources/googleplaystoreCleaned.csv", FileMode.Create);
 
@@ -32,13 +34,14 @@ public class DataCleaner
                 it[0] == '$' && double.TryParse(it.AsSpan(1), out _)
             )
         )
-        .DistinctBy(i => i.AppName)
+        .DistinctBy(i => i.AppName.Let(ImportGooglePlayApps.ToHandle))
         .Let(it => mLContext.Data.LoadFromEnumerable(it))
         .Apply(it => mLContext.Data.SaveAsText(it, fileStream,
 '\t',
 true,
 true
         ));
-    }
 
+        return await GenericExtensions.NullTask;
+    }
 }

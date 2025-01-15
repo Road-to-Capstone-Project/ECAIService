@@ -11,6 +11,7 @@ using ECAIService.Services.Abstractions;
 using Microsoft.ML.Data;
 using Pgvector;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -34,7 +35,7 @@ public class ContentBasedVectorController(
             {
                 o.VariantId = i.VariantId;
                 o.Categories = encodingService.MultiHotEncode<double>(i.Categories, categories);
-                o.Weight = i.Weight;
+                o.Rank = i.Rank;
                 o.Price = i.Price;
             }, "");
 
@@ -50,7 +51,7 @@ public class ContentBasedVectorController(
             {
                 o.VariantId = i.VariantId;
                 o.Categories = encodingService.MultiHotEncode<double>(i.Categories, categories);
-                o.Weight = i.Weight;
+                o.Rank = i.Rank;
                 o.Price = i.Price;
             }, "");
 
@@ -82,7 +83,7 @@ public class ContentBasedVectorController(
             {
                 VariantId = i.Id,
                 Categories = i.Product!.ProductCategories.Select(it => it.Name).ToArray(),
-                Weight = double.Parse(i.Product!.Weight!),
+                Rank = (double)i.VariantRank!,
                 Price = (double)cVOSContext.ProductVariantPriceSets.Where(it => it.VariantId == i.Id)
                     .Select(it => 
                         cVOSContext.PriceSets
@@ -100,7 +101,7 @@ public class ContentBasedVectorController(
             {
                 VariantId = it.VariantId,
                 Categories = it.Categories,
-                Weight = it.Weight,
+                Rank = it.Rank,
                 Price = (double)it.Price
             })
             .Let(it => mLContext.Data.LoadFromEnumerable(it))
@@ -160,7 +161,7 @@ public class ContentBasedVectorController(
             {
                 VariantId = it.VariantId,
                 Categories = it.Categories,
-                Weight = it.Weight,
+                Rank = it.Weight,
                 Price = (double)it.Price
             })
             .Let(it => mLContext.Data.LoadFromEnumerable(it))
@@ -205,7 +206,7 @@ public class ContentBasedVectorController(
     }
 
     [HttpGet("[action]")]
-    public async Task<IEnumerable<string>> Neighbors([Required] string variantId, [Required] int count, bool distance = false)
+    public async Task<IEnumerable<object>> Neighbors([Required] string variantId, [Required] int count, bool distance = false)
     {
         using var dataSource = dataSourceBuilder.Build();
         using var npgsqlConnection = dataSource.CreateConnection();
@@ -229,12 +230,14 @@ public class ContentBasedVectorController(
             $"{nameof(ContentBasedVector.Embeddings).ToLower()} <-> @vector AS distance " +
             $"FROM {ContentBasedVectorTable} " +
             $"WHERE variant_id <> @variantId " +
-            $"AND product_id <> @productId " +
-            $"ORDER BY distance " +  // Added space before "LIMIT"
+            ($"AND (SELECT product_id FROM " +
+            $"public.product_variant " +
+            $"WHERE id = @variantId) <> @productId ").Be("") +
+            $"ORDER BY distance " +
             $"LIMIT @count",
             new { vector, count, variantId, productId }
         );
 
-        return result.Select(i => distance ? i.ToString() : i.Id);
+        return result.Select(i => (object)(distance ? i : i.Id));
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,18 @@ public static class GenericExtensions
         return func(obj);
     }
 
+    public static async Task<T> ApplyAsync<T>(this Task<T> obj, Action<T> action)
+    {
+        return await obj.ContinueWith(async i => (await i).Apply(action)).Unwrap();
+        //return action(await obj);
+    }
+
+    public static async Task<TOut> LetAsync<T, TOut>(this Task<T> obj, Func<T, TOut> func)
+    {
+        return await obj.ContinueWith(async i => (await i).Let(func)).Unwrap();
+        //return action(await obj);
+    }
+
     public static TOut Let<T, T0, TOut>(this T obj, Func<T, T0, TOut> func, T0 arg)
         where T : allows ref struct
         where T0 : allows ref struct
@@ -46,6 +59,7 @@ public static class GenericExtensions
         return source.SelectMany(i => i);
     }
 
+    [Obsolete("Do not use in production.")]
     public static TOut Be<T, TOut>(this T _, TOut other)
     {
         return other;
@@ -89,6 +103,15 @@ public static class GenericExtensions
     {
         return new RangeEnumerable(range.Start.Value, range.End.Value);
     }
+
+    public static async Task<TResult> Await<TResult>(this Task<Task<TResult>> task)
+    {
+        return await await task;
+    }
+
+    public static object? Null => null;
+
+    public static Task<object?> NullTask { get; } = Task.FromResult<object?>(null);
 
     public readonly record struct RangeEnumerable(int start, int end) : IEnumerable<int>
     {
