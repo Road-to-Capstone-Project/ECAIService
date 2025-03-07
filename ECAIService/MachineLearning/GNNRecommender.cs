@@ -4,6 +4,8 @@ using TorchSharp.Modules;
 using static TorchSharp.torch;
 using static TorchSharp.torch.nn;
 
+using Tensor = TorchSharp.torch.Tensor;
+
 namespace ECAIService.MachineLearning;
 
 public class GNNRecommender : Module

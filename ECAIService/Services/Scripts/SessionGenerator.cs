@@ -23,9 +23,13 @@ public class SessionGenerator(Random random,
     {
         using var u = npgsqlConnectionDisposables;
         var (dataSource, connection) = npgsqlConnectionDisposables;
-        var variants = cVOSContext.ProductVariants.ToArray();
+        var variants = cVOSContext.ProductSalesChannels.Where(i => i.SalesChannelId == "google-play")
+            .Select(i => i.ProductId)
+            .Select(i => cVOSContext.Products.Where(j => j.Id == i).First()!.ProductVariants.FirstOrDefault())
+            .Where(i => i != null)
+            .ToArray();
 
-        var path = "Resources/sessions.txt";
+        var path = "Resources/sessions2.txt";
 
         File.WriteAllText(
             path,
@@ -36,10 +40,10 @@ public class SessionGenerator(Random random,
                     new List<string>(),
                     (acc, i) =>
                     {
-                        if (i == 0 || random.Next(0, 1000) == 0)
+                        if (i == 0 || random.Next(0, 1000) == -1)
                         {
                             var variant = variants[random.Next(0, variants.Length)];
-                            acc.Add(variant.Id);
+                            acc.Add(variant!.Id);
                         }
                         else
                         {
@@ -52,21 +56,47 @@ public class SessionGenerator(Random random,
 
                             var count = 40;
 
-                            var result = connection.Query<string>(
-                                $"SELECT variant_id FROM {ContentBasedVectorTable} " +
-                                $"WHERE variant_id <> @variantId " +
-                                $"ORDER BY {nameof(ContentBasedVector.Embeddings).ToLower()} <-> @vector " +
+                            var result = connection.Query<DistanceResult<string>>(
+                                $"SELECT id, distance " +
+                                $"FROM (" +
+                                $"    SELECT variant_id AS id, " +
+                                $"    {nameof(ContentBasedVector.Embeddings).ToLower()} <-> @vector AS distance " +
+                                $"    FROM {ContentBasedVectorTable} " +
+                                $"    WHERE variant_id <> @variantId " +
+                                $") " +
+                                $"WHERE distance < 3 " +
+                                $"ORDER BY distance " +
                                 $"LIMIT @count",
                                 new { vector, count, variantId }
                             ).ToArray();
 
-                            var variant = result[random.Next(0, count)].Let(it => cVOSContext.ProductVariants.Find(it));
+                            if (result.Length < 3)
+                            {
+                                result = connection.Query<DistanceResult<string>>(
+                                $"SELECT id, distance " +
+                                $"FROM (" +
+                                $"    SELECT variant_id AS id, " +
+                                $"    {nameof(ContentBasedVector.Embeddings).ToLower()} <-> @vector AS distance " +
+                                $"    FROM {ContentBasedVectorTable} " +
+                                $"    WHERE variant_id <> @variantId " +
+                                $") " +
+                                $"ORDER BY distance " +
+                                $"LIMIT @count",
+                            
+                                new { vector, count, variantId }
+                            ).ToArray();
+                            }
+
+                            var variant = result[random.Next(0, Math.Min(count, result.Length))].Let(it => cVOSContext.ProductVariants.Find(it.Id));
 
                             acc.Add(variant!.Id);
                         }
                         return acc;
                     }
                 )
+                .Let(Enumerable.Reverse)
+                .Distinct()
+                .Reverse()
                 .Let(it => string.Join(";", it))
             )
             .Let(it => string.Join("\n", it))

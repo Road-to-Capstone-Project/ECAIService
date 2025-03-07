@@ -1,32 +1,61 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TypeScriptNoImplicitAny>True</TypeScriptNoImplicitAny>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TypeScriptNoImplicitAny>True</TypeScriptNoImplicitAny>
+  </PropertyGroup>
+
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>4fa45121-2cb6-41bd-98d6-cae4c28e07e6</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningLevel>1</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <WarningLevel>1</WarningLevel>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="5.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-    <PackageReference Include="Microsoft.ML" Version="4.0.0" />
-    <PackageReference Include="Microsoft.ML.TensorFlow" Version="4.0.0" />
-    <PackageReference Include="Microsoft.ML.TorchSharp" Version="0.22.0" />
-	<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+    <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageReference Include="ErikEJ.EntityFrameworkCore.DgmlBuilder" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+    <PackageReference Include="Microsoft.ML" Version="4.0.1" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu.Windows" Version="1.20.1" />
+    <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="4.0.1" />
+    <PackageReference Include="Microsoft.ML.Recommender" Version="0.22.0" />
+    <PackageReference Include="Microsoft.ML.TensorFlow" Version="4.0.1" />
+    <PackageReference Include="Microsoft.ML.TorchSharp" Version="0.22.1" />
+	<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.1" />
+    <PackageReference Include="NumSharp" Version="0.30.0" />
     <PackageReference Include="Pgvector.Dapper" Version="0.3.0" />
+    <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.2.1" />
+    <PackageReference Include="Qdrant.Client" Version="1.13.0" />
+    <PackageReference Include="SciSharp.TensorFlow.Redist-Windows-GPU" Version="2.10.3" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    <PackageReference Include="System.Windows.Extensions" Version="9.0.0" />
-    <PackageReference Include="TensorFlow.Keras" Version="0.15.0" />
+    <PackageReference Include="System.Windows.Extensions" Version="9.0.1" />
+    <PackageReference Include="TensorFlow.Keras" Version="0.11.4" />
+    <PackageReference Include="TensorFlow.NET" Version="0.110.4" />
+    <PackageReference Include="Tokenizers.DotNet" Version="1.1.0" />
+    <PackageReference Include="Tokenizers.DotNet.runtime.win-x64" Version="1.1.0" />
     <PackageReference Include="TorchSharp-cuda-windows" Version="0.105.0" />
   </ItemGroup>
 
@@ -39,6 +68,18 @@
     <Using Include="TorchSharp.torch.nn">
       <Static>True</Static>
     </Using>
+	<Using Include="Tensorflow" />
+    <Using Include="Tensorflow.Binding">
+      <Static>True</Static>
+    </Using>
+	<Using Include="Tensorflow.Keras" />
+	<Using Include="Tensorflow.Keras.Layers" />
+	<Using Include="Tensorflow.Keras.Models" />
+	<Using Include="Tensorflow.Keras.Optimizers" />
+	<Using Include="Tensorflow.Keras.Engine" />	  
+    <Using Include="Tensorflow.NumPy" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>

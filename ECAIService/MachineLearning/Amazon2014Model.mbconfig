@@ -1,0 +1,297 @@
+﻿{
+  "Scenario": "Recommendation",
+  "DataSource": {
+    "Version": 3,
+    "EscapeCharacter": "\"",
+    "ReadMultiLines": false,
+    "KeepDiacritics": false,
+    "KeepPunctuations": false,
+    "AllowQuoting": true,
+    "Type": "TabularFile",
+    "FilePath": "D:\\Projects\\CSharp\\ECAIService\\ECAIService\\Resources\\reviews_Video_Games_5.csv",
+    "Delimiter": "\t",
+    "DecimalMarker": ".",
+    "HasHeader": true,
+    "ColumnProperties": [
+      {
+        "ColumnName": "ReviewerID",
+        "ColumnPurpose": "User",
+        "ColumnDataFormat": "String",
+        "IsCategorical": true,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "ASIN",
+        "ColumnPurpose": "Item",
+        "ColumnDataFormat": "String",
+        "IsCategorical": true,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "ReviewerName",
+        "ColumnPurpose": "Ignore",
+        "ColumnDataFormat": "String",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "ReviewText",
+        "ColumnPurpose": "Ignore",
+        "ColumnDataFormat": "String",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "Overall",
+        "ColumnPurpose": "Label",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "Summary",
+        "ColumnPurpose": "Ignore",
+        "ColumnDataFormat": "String",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      },
+      {
+        "ColumnName": "UnixReviewTime",
+        "ColumnPurpose": "Ignore",
+        "ColumnDataFormat": "Single",
+        "IsCategorical": false,
+        "Type": "Column",
+        "Version": 5
+      }
+    ]
+  },
+  "Environment": {
+    "Type": "LocalCPU",
+    "Version": 1
+  },
+  "RunHistory": {
+    "Version": 3,
+    "Type": "Result",
+    "Trials": [
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "MatrixFactorization",
+        "Score": -0.66748924655424169,
+        "RuntimeInSeconds": 4.134,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e2 * e3 * e4",
+          "e0": {
+            "OutputColumnName": "ASIN",
+            "InputColumnName": "ASIN",
+            "AddKeyValueAnnotationsAsText": false
+          },
+          "e1": {
+            "OutputColumnName": "ReviewerID",
+            "InputColumnName": "ReviewerID",
+            "AddKeyValueAnnotationsAsText": false
+          },
+          "e2": {
+            "LabelColumnName": "Overall",
+            "MatrixColumnIndexColumnName": "ReviewerID",
+            "MatrixRowIndexColumnName": "ASIN",
+            "ApproximationRank": 11,
+            "LearningRate": 0.11142021152467237,
+            "NumberOfIterations": 41,
+            "Quiet": true
+          },
+          "e3": {
+            "OutputColumnName": "ReviewerID",
+            "InputColumnName": "ReviewerID"
+          },
+          "e4": {
+            "OutputColumnName": "ASIN",
+            "InputColumnName": "ASIN"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "MatrixFactorization",
+        "Score": -0.66755356439361924,
+        "RuntimeInSeconds": 4.957,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e2 * e3 * e4",
+          "e0": {
+            "OutputColumnName": "ASIN",
+            "InputColumnName": "ASIN",
+            "AddKeyValueAnnotationsAsText": false
+          },
+          "e1": {
+            "OutputColumnName": "ReviewerID",
+            "InputColumnName": "ReviewerID",
+            "AddKeyValueAnnotationsAsText": false
+          },
+          "e2": {
+            "LabelColumnName": "Overall",
+            "MatrixColumnIndexColumnName": "ReviewerID",
+            "MatrixRowIndexColumnName": "ASIN",
+            "ApproximationRank": 10,
+            "LearningRate": 0.12740460722712055,
+            "NumberOfIterations": 42,
+            "Quiet": true
+          },
+          "e3": {
+            "OutputColumnName": "ReviewerID",
+            "InputColumnName": "ReviewerID"
+          },
+          "e4": {
+            "OutputColumnName": "ASIN",
+            "InputColumnName": "ASIN"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "MatrixFactorization",
+        "Score": -0.667834249173819,
+        "RuntimeInSeconds": 3.989,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e2 * e3 * e4",
+          "e0": {
+            "OutputColumnName": "ASIN",
+            "InputColumnName": "ASIN",
+            "AddKeyValueAnnotationsAsText": false
+          },
+          "e1": {
+            "OutputColumnName": "ReviewerID",
+            "InputColumnName": "ReviewerID",
+            "AddKeyValueAnnotationsAsText": false
+          },
+          "e2": {
+            "LabelColumnName": "Overall",
+            "MatrixColumnIndexColumnName": "ReviewerID",
+            "MatrixRowIndexColumnName": "ASIN",
+            "ApproximationRank": 11,
+            "LearningRate": 0.1120044292079363,
+            "NumberOfIterations": 40,
+            "Quiet": true
+          },
+          "e3": {
+            "OutputColumnName": "ReviewerID",
+            "InputColumnName": "ReviewerID"
+          },
+          "e4": {
+            "OutputColumnName": "ASIN",
+            "InputColumnName": "ASIN"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "MatrixFactorization",
+        "Score": -0.66869544581245166,
+        "RuntimeInSeconds": 3.823,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e2 * e3 * e4",
+          "e0": {
+            "OutputColumnName": "ASIN",
+            "InputColumnName": "ASIN",
+            "AddKeyValueAnnotationsAsText": false
+          },
+          "e1": {
+            "OutputColumnName": "ReviewerID",
+            "InputColumnName": "ReviewerID",
+            "AddKeyValueAnnotationsAsText": false
+          },
+          "e2": {
+            "LabelColumnName": "Overall",
+            "MatrixColumnIndexColumnName": "ReviewerID",
+            "MatrixRowIndexColumnName": "ASIN",
+            "ApproximationRank": 10,
+            "LearningRate": 0.10230435319843144,
+            "NumberOfIterations": 53,
+            "Quiet": true
+          },
+          "e3": {
+            "OutputColumnName": "ReviewerID",
+            "InputColumnName": "ReviewerID"
+          },
+          "e4": {
+            "OutputColumnName": "ASIN",
+            "InputColumnName": "ASIN"
+          }
+        }
+      },
+      {
+        "Version": 1,
+        "Type": "Trial",
+        "TrainerName": "MatrixFactorization",
+        "Score": -0.669344472375994,
+        "RuntimeInSeconds": 5.372,
+        "Parameter": {
+          "_SCHEMA_": "e0 * e1 * e2 * e3 * e4",
+          "e0": {
+            "OutputColumnName": "ASIN",
+            "InputColumnName": "ASIN",
+            "AddKeyValueAnnotationsAsText": false
+          },
+          "e1": {
+            "OutputColumnName": "ReviewerID",
+            "InputColumnName": "ReviewerID",
+            "AddKeyValueAnnotationsAsText": false
+          },
+          "e2": {
+            "LabelColumnName": "Overall",
+            "MatrixColumnIndexColumnName": "ReviewerID",
+            "MatrixRowIndexColumnName": "ASIN",
+            "ApproximationRank": 10,
+            "LearningRate": 0.10602234701515083,
+            "NumberOfIterations": 53,
+            "Quiet": true
+          },
+          "e3": {
+            "OutputColumnName": "ReviewerID",
+            "InputColumnName": "ReviewerID"
+          },
+          "e4": {
+            "OutputColumnName": "ASIN",
+            "InputColumnName": "ASIN"
+          }
+        }
+      }
+    ],
+    "Estimators": {
+      "e0": "MapValueToKey",
+      "e1": "MapValueToKey",
+      "e2": "MatrixFactorization",
+      "e3": "MapKeyToValue",
+      "e4": "MapKeyToValue"
+    },
+    "Schema": "e0 * e1 * e2 * e3 * e4",
+    "MetricName": "RSquared",
+    "ModelFilePath": "D:\\Projects\\CSharp\\ECAIService\\ECAIService\\MachineLearning\\Amazon2014Model.mlnet"
+  },
+  "Type": "TrainingConfig",
+  "Version": 5,
+  "TrainingOption": {
+    "Version": 2,
+    "Subsampling": false,
+    "Tuner": "eci-cfo",
+    "Type": "RecommendationTrainingOption",
+    "TrainingTime": 1800,
+    "OptimizeMetric": "RSquared",
+    "LabelColumn": "Overall",
+    "UserIdColumn": "ReviewerID",
+    "ItemIdColumn": "ASIN",
+    "ValidationOption": {
+      "Version": 0,
+      "Type": "TrainValidateSplitValidationOption",
+      "SplitRatio": 0.2
+    }
+  }
+}

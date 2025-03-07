@@ -1,4 +1,5 @@
-﻿using ECAIService.Services.Scripts;
+﻿using ECAIService.Services;
+using ECAIService.Services.Scripts;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,12 @@ namespace ECAIService.Controllers;
 [ApiController]
 public class ScriptController(
         IServiceProvider serviceProvider,
-        GNNService gNNService
+        GNNService gNNService,
+        RNNFactory rNNFactory,
+        RNNModelService rnnModelService
     )
 {
+
     [HttpGet]
     public IEnumerable<string> GetAvailableScripts()
     {
@@ -41,5 +45,11 @@ public class ScriptController(
     {
         gNNService.Sequence = sequence;
         await gNNService.ExecuteAsync();
+    }
+
+    [HttpPost("[action]")]
+    public IEnumerable<IEnumerable<string>> RNN([FromQuery(Name = "i")] ICollection<string> sequence)
+    {
+        return rNNFactory.Predict2(rnnModelService.Model, sequence, rnnModelService.Encoders);
     }
 }

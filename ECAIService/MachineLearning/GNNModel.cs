@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using System.Linq;
+using Tensor = TorchSharp.torch.Tensor;
 
 namespace ECAIService.MachineLearning;
 
@@ -6,13 +8,17 @@ public class GNNModel : Module
 {
     private readonly Linear _conv1;
     private readonly Linear _conv2;
+    private readonly ILogger<GNNModel> _logger;
 
     public GNNModel(
         long inputDim,
         long hiddenDim,
         long outputDim,
-        string name = nameof(GNNModel)) : base(name)
+        ILogger<GNNModel> logger,
+        string name = nameof(GNNModel)
+        ) : base(name)
     {
+        _logger = logger;
         _conv1 = Linear(inputDim, hiddenDim);
         _conv2 = Linear(hiddenDim, outputDim);
         RegisterComponents();
@@ -40,31 +46,21 @@ public class GNNModel : Module
             inputMask[products[product]] = 1;
         }
 
-        GC.Collect();
-
         // Aggregate embeddings for input sequence
         var sequenceEmbedding = torch.mm(inputMask.unsqueeze(0), output)
             .Let(it => it / it.norm());
 
-        GC.Collect();
-
         var normalizedOutput = output / output.norm(1, keepdim: true);
-
-        GC.Collect();
 
         var scores = torch.mm(sequenceEmbedding, normalizedOutput.T);
 
-        GC.Collect();
-
         // Find top predictions
         var topPredictions = scores.argsort(descending: true).flatten();
+        foreach (var idx in topPredictions.data<long>().Select(v => (int)v).Where(idx => !inputSequence.Contains(inverses[idx]))
         //buffer.AppendLine("Top Predictions:");
-        foreach (int idx in topPredictions.data<long>())
+        )
         {
-            if (!inputSequence.Contains(inverses[idx]))
-            {
-                buffer.AppendLine(inverses[idx]);
-            }
+            buffer.AppendLine(inverses[idx]);
         }
 
         File.WriteAllText("Resources/output2.txt", buffer.ToString());

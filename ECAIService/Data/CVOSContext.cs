@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+
+using ECAIService.MLModelTables;
 using ECAIService.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ECAIService.Data;
 
@@ -9,12 +13,15 @@ public partial class CVOSContext : DbContext
 {
     public CVOSContext()
     {
+
     }
 
     public CVOSContext(DbContextOptions<CVOSContext> options)
         : base(options)
     {
     }
+
+    public virtual DbSet<VariantTextEmbedding> VariantTextEmbeddings { get; set; }
 
     public virtual DbSet<ApiKey> ApiKeys { get; set; }
 
@@ -254,6 +261,8 @@ public partial class CVOSContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresExtension("vector");
+
         modelBuilder
             .HasPostgresEnum("claim_reason_enum", new[] { "missing_item", "wrong_item", "production_failure", "other" })
             .HasPostgresEnum("order_claim_type_enum", new[] { "refund", "replace" })
@@ -2116,6 +2125,13 @@ public partial class CVOSContext : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("now()");
         });
+
+        modelBuilder.Entity<VariantTextEmbedding>()
+            .HasOne(v => v.Variant)
+            .WithOne()
+
+            .HasForeignKey<VariantTextEmbedding>(v => v.VariantId)
+            .IsRequired();
 
         OnModelCreatingPartial(modelBuilder);
     }

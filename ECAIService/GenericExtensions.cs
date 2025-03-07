@@ -1,16 +1,23 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 using ECAIService.PipelineDto;
 
 namespace ECAIService;
+
+[DebuggerStepThrough]
 public static class GenericExtensions
 {
+ 
     public static T Apply<T>(this T obj, Action<T> action)
         where T : allows ref struct
     {
@@ -38,6 +45,11 @@ public static class GenericExtensions
         //return action(await obj);
     }
 
+    public static (TOut, TOut) Select<T, TOut>(this (T, T) obj, Func<T, TOut> func)
+    {
+        return (func(obj.Item1), func(obj.Item2));
+    }
+
     public static TOut Let<T, T0, TOut>(this T obj, Func<T, T0, TOut> func, T0 arg)
         where T : allows ref struct
         where T0 : allows ref struct
@@ -54,15 +66,68 @@ public static class GenericExtensions
         return func(arg, obj);
     }
 
+    public static TOut Operate<T, TOut>(this T obj, Func<T, T, TOut> func, T other)
+    where T : allows ref struct
+    where TOut : allows ref struct
+    {
+        return func(obj, other);
+    }
+
+    public static TOut Let<T, T0, T1, TOut>(this T obj, Func<T, T0, T1, TOut> func, T0 arg, T1 arg1)
+    where T : allows ref struct
+    where T0 : allows ref struct
+    where TOut : allows ref struct
+    {
+        return func(obj, arg, arg1);
+    }
+
+    public static TOut Let<T, T0, T1, TOut>(this T obj, Func<T0, T, T1, TOut> func, T0 arg, T1 arg1)
+        where T : allows ref struct
+        where T0 : allows ref struct
+        where TOut : allows ref struct
+    {
+        return func(arg, obj, arg1);
+    }
+
+    public static TOut Let<T, T0, T1, TOut>(this T obj, Func<T0, T1, T, TOut> func, T0 arg, T1 arg1)
+        where T : allows ref struct
+        where T0 : allows ref struct
+        where TOut : allows ref struct
+    {
+        return func(arg, arg1, obj);
+    }
+
+
     public static IEnumerable<T> SelectMany<T>(this IEnumerable<IEnumerable<T>> source)
     {
         return source.SelectMany(i => i);
     }
 
-    [Obsolete("Do not use in production.")]
+    //[Obsolete("Do not use in production.")]
     public static TOut Be<T, TOut>(this T _, TOut other)
     {
         return other;
+    }
+
+    public static T Out<T>(this T obj, out T state)
+    {
+        state = obj;
+        return obj;
+    }
+
+    public static T RefOut<T>(this T obj, ref T state, out T previousState)
+    {
+        previousState = state;
+        state = obj;
+        return obj;
+    }
+
+    public static T RefRefOut<T>(this T obj, ref T state, ref T previousState, out T previousPreviousState)
+    {
+        previousPreviousState = previousState;
+        previousState = state;
+        state = obj;
+        return obj;
     }
 
     public static void Fire(this Action action)
@@ -109,15 +174,22 @@ public static class GenericExtensions
         return await await task;
     }
 
+    public static Guid NewGuid(this Random random)
+    {
+        return GC.AllocateUninitializedArray<byte>(16)
+            .Apply(random.NextBytes)
+            .Let(it => new Guid(it));
+    }
+
     public static object? Null => null;
 
-    public static Task<object?> NullTask { get; } = Task.FromResult<object?>(null);
+    public static ConfiguredTaskAwaitable<object?> NullTask { get; } = Task.FromResult<object?>(null).ConfigureAwait(false);
 
-    public readonly record struct RangeEnumerable(int start, int end) : IEnumerable<int>
+    public readonly record struct RangeEnumerable(int Start, int End) : IEnumerable<int>
     {
         public readonly IEnumerator<int> GetEnumerator()
         {
-            for (int i = start; i < end; i++)
+            for (int i = Start; i < End; i++)
             {
                 yield return i;
             }

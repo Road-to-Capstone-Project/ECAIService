@@ -1,6 +1,8 @@
 @ECAIService_HostAddressDebug = http://localhost:5171
 @ECAIService_HostAddressRelease = http://localhost:5000
-@ECAIService_HostAddress = {{ECAIService_HostAddressDebug}}
+@ECAIService_HostAddressD = {{ECAIService_HostAddressDebug}}
+@ECAIService_HostAddressR = {{ECAIService_HostAddressRelease}}
+@ECAIService_HostAddress = {{ECAIService_HostAddressD}}
 
 GET {{ECAIService_HostAddress}}/weatherforecast/
 Accept: application/json
@@ -17,7 +19,7 @@ timeout: 1000000
 
 ###
 
-POST {{ECAIService_HostAddress}}/api/contentbasedvector/calculateVector?variantId=variant_01JG0XCNJW5ZXK02KE5BX73PND
+POST {{ECAIService_HostAddress}}/api/contentbasedvector/calculateVector?variantId=-melina--cz-inzer-ty-inzerce
 
 ###
 
@@ -25,7 +27,7 @@ DELETE {{ECAIService_HostAddress}}/api/contentbasedvector/delete?variantId=varia
 
 ###
 
-GET {{ECAIService_HostAddress}}/api/contentbasedvector/neighbors?variantId=--av--&count=12&distance=true
+GET {{ECAIService_HostAddress}}/api/contentbasedvector/neighbors?variantId=variant_01JG0XCNJZSWRKDYWVDCF9M0X5&count=40&distance=true
 timeout: 1000000
 ###
 
@@ -36,8 +38,42 @@ x-publishable-api-key: pk_ab81ea0abb05a1fdf71cfc0837e2dee02a9735e202ea179ff91820
 GET {{ECAIService_HostAddress}}/api/script
 ###
 
-POST {{ECAIService_HostAddress}}/api/script?s=DataCleaner
+POST {{ECAIService_HostAddress}}/api/script?s=SessionToCSV
 timeout: 1000000
 ###
 
 POST {{ECAIService_HostAddress}}/api/script/gnn?i=-r
+timeout: 1000000
+
+###
+
+POST {{ECAIService_HostAddress}}/api/script/rnn?i=viking-cb-radios&i=websites-co-in-instant-website
+timeout: 1000000
+
+###
+
+GET {{ECAIService_HostAddress}}/api/transformer/transform?text=video+games
+timeout: 1000000
+
+###
+
+PUT {{ECAIService_HostAddress}}/api/transformer/calculateVectors
+timeout: 1000000
+
+###
+
+PUT {{ECAIService_HostAddress}}/api/transformer/calculateVector?variantId=variant_01JG0XCNJW5ZXK02KE5BX73PND
+
+###
+
+DELETE {{ECAIService_HostAddress}}/api/transformer/delete?variantId=variant_01JG0XCNJW5ZXK02KE5BX73PND
+
+###
+
+GET {{ECAIService_HostAddress}}/api/transformer/neighbors?variantId=variant_01JG0XCNJZSWRKDYWVDCF9M0X5&size=40&distance=true
+timeout: 1000000
+###
+
+GET {{ECAIService_HostAddress}}/api/transformer/query?query=minecraft&size=40&distance=true
+timeout: 1000000
+###

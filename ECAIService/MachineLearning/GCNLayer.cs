@@ -1,14 +1,16 @@
-﻿namespace ECAIService.MachineLearning;
-
+﻿
 using TorchSharp;
 using TorchSharp.Modules;
 
 using static TorchSharp.torch;
 using static TorchSharp.torch.nn;
 
+using Tensor = TorchSharp.torch.Tensor;
+
+namespace ECAIService.MachineLearning;
 class GCNLayer : Module
 {
-    private Linear linear;
+    private readonly Linear linear;
 
     public GCNLayer(long inputDim, long outputDim, string name = nameof(GCNLayer)) : base(name)
     {

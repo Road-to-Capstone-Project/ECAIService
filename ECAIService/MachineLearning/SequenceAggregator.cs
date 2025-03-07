@@ -1,4 +1,7 @@
-﻿namespace ECAIService.MachineLearning;
+﻿using GRU = TorchSharp.Modules.GRU;
+using Tensor = TorchSharp.torch.Tensor;
+
+namespace ECAIService.MachineLearning;
 
 public class SequenceAggregator : Module
 {

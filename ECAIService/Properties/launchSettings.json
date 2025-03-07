@@ -2,7 +2,7 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "commandLineArgs": "_ScriptsOnly\r\n_DataCleaner\r\n_SessionGenerator\r\n_TokenDictionaryService\r\n_GNNService\r\n_RemoveGooglePlayApps\r\n_ImportGooglePlayApps",
+      "commandLineArgs": "_ScriptsOnly\r\n_DataCleaner\r\n_SessionGenerator\r\n_SessionToCSV\r\n_TokenDictionaryService\r\n_GNNService\r\n_RNNScript\r\n_RemoveGooglePlayApps\r\n_ImportGooglePlayApps\r\n_ReviewsToCSV",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

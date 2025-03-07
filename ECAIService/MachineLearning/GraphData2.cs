@@ -1,4 +1,6 @@
-﻿namespace ECAIService.MachineLearning;
+﻿using Tensor = TorchSharp.torch.Tensor;
+
+namespace ECAIService.MachineLearning;
 
 public record GraphData2(Tensor NodeFeatures, Tensor AdjacencyMatrix)
 {
