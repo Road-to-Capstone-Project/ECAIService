@@ -1,4 +1,4 @@
-﻿using ECAIService.Services;
+using ECAIService.Services;
 using ECAIService.Services.Scripts;
 
 using Microsoft.AspNetCore.Components;
