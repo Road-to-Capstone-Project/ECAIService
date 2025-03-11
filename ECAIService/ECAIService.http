@@ -62,18 +62,18 @@ timeout: 1000000
 
 ###
 
-PUT {{ECAIService_HostAddress}}/api/transformer/calculateVector?variantId=variant_01JG0XCNJW5ZXK02KE5BX73PND
+PUT {{ECAIService_HostAddress}}/api/transformer/calculateVector?variantId=variant_01JN54N4RVJ8ZSD2WKCBG5PMR3
 
 ###
 
-DELETE {{ECAIService_HostAddress}}/api/transformer/delete?variantId=variant_01JG0XCNJW5ZXK02KE5BX73PND
+DELETE {{ECAIService_HostAddress}}/api/transformer/delete?variantId=variant_01JN54N4RVJ8ZSD2WKCBG5PMR3
 
 ###
 
-GET {{ECAIService_HostAddress}}/api/transformer/neighbors?variantId=variant_01JG0XCNJZSWRKDYWVDCF9M0X5&size=40&distance=true
+GET {{ECAIService_HostAddress}}/api/transformer/neighbors?variantId=variant_01JN54N4RVJ8ZSD2WKCBG5PMR3&size=40&distance=true
 timeout: 1000000
 ###
 
-GET {{ECAIService_HostAddress}}/api/transformer/query?query=minecraft&size=40&distance=true
+GET {{ECAIService_HostAddress}}/api/transformer/query?query=xbox&size=40&distance=true
 timeout: 1000000
 ###
